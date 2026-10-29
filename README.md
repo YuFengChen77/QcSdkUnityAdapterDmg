@@ -49,7 +49,7 @@ import QcSdkUnityAdapterDmg
 precondition(NSClassFromString("QcSdkUnityAdapterDmg.DmgUnityAppControllerProxy") != nil)
 ```
 
-`-ObjC` 缺失可能使只通过类名访问的实现被裁掉。不要直接创建内部 Provider 代替 SDK 的公开业务入口；通过编译和反射检查后，仍需配置渠道并联调对应功能。
+`-ObjC` 缺失可能使只通过类名访问的实现被裁掉。业务通过 SDK 公开入口调用，不直接依赖内部实现类；通过编译和反射检查后，仍需完成本模块配置及业务联调。
 
 ## DMG 代理与 UI 配置
 
@@ -85,7 +85,7 @@ QcSdkUnityAdapterDmg/
 └── Resources/
 ```
 
-`Sources/Dependencies.swift` 只组织导入，不包含业务实现；辅助 target 为 `QcSdkUnityAdapterDmgSupport`。接入方选择和导入的仍是 `QcSdkUnityAdapterDmg`，不需要额外选择 Support 产品。本模块的资源由 SPM 处理成 `QcSdkUnityAdapterDmg_QcSdkUnityAdapterDmgSupport.bundle`，包括当前声明的资源与隐私文件；不需要手工复制。
+`Sources/Dependencies.swift` 只组织导入，不包含业务实现；辅助 target 为 `QcSdkUnityAdapterDmgSupport`。接入方选择和导入的仍是 `QcSdkUnityAdapterDmg`，不需要额外选择 Support 产品。本模块的资源由 SPM 处理成 `QcSdkUnityAdapterDmg_QcSdkUnityAdapterDmgSupport.bundle`，包含自身 UI 图片，不需要手工复制。Core 的字体、多语言和隐私清单由 Core 包交付；本模块未声明额外隐私清单。
 
 Xcode 左侧未显示 XCFramework 不代表下载失败，文件通常位于工程 DerivedData 的 `SourcePackages/artifacts`。以包解析、Target 产品链接、构建和运行结果确认接入；不要为显示节点重复手动集成。
 
@@ -100,7 +100,7 @@ Xcode 左侧未显示 XCFramework 不代表下载失败，文件通常位于工�
 ## 注意事项
 
 - 自有 SDK 为静态链接，不重复同时集成手动 Framework 和 SPM 产品，不手工将自有静态 Framework 设置为 Embed & Sign。第三方若含动态依赖，由最终 App 正常嵌入和签名。
-- 包解析与反射检查不等于真实账号授权、分享、上报或 Unity 业务已验证；按本模块配置执行真机 / 宿主联调。
+- 包解析与反射检查不代表业务验收完成；仍需验证DMG Unity 启动、隐私流程及自定义弹窗。
 - SDK 的资源和公开 `.swiftinterface` / Objective-C 头文件可以查看，但不包含业务实现源码。
 - 不将 Client Secret、服务端密钥、授权 token 或内部日志提交到公开仓库。
 - Core 通用集成和业务配置另见 [QcSdkCore README](https://github.com/YuFengChen77/QcSdkCore#readme)。
